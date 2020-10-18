@@ -5,59 +5,6 @@
 
 namespace Module1 {
 
-    template  <int N>
-    class Vector
-    {
-    public:
-        using elem = float;
-        using iter = float*;
-        using citer = const float*;
-        using ref = float&;
-        using cref = const float&;
-
-        Vector() {
-            std::memset(&this->arr[0], 0, N*sizeof(float));
-        };
-
-        Vector(const Vector& v) {
-            std::memcpy(&this->arr[0], &v.arr[0], N*sizeof(float));
-        }
-
-        Vector(Vector&& v) {
-            std::memcpy(&this->arr[0], &v.arr[0], N*sizeof(float));
-        }
-
-        explicit Vector(float arr[N]) {
-            std::memcpy(&this->arr[0], &arr[0], N*sizeof(float));
-        }
-
-        static int length() noexcept { return N; }
-
-        ref operator[](size_t i) noexcept {
-            assert(i < N);
-            return arr[i];
-        }
-
-        cref operator[](size_t i) const noexcept {
-            assert(i < N);
-            return arr[i];
-        }
-
-        inline iter begin() noexcept { return &arr[0]; }
-        inline iter end() noexcept { return &arr[0] + N; }
-        inline citer begin() const noexcept { return &arr[0]; }
-        inline citer end() const noexcept { return &arr[0] + N; }
-        inline citer cbegin() const noexcept { return &arr[0]; }
-        inline citer cend() const noexcept { return &arr[0] + N; }
-
-        inline iter rbegin() noexcept { return &arr[0] + N - 1; }
-        inline iter rend() noexcept { return &arr[0] - 1; }
-        inline citer rcbegin() const noexcept { return &arr[0] + N - 1; }
-        inline citer rcend() const noexcept { return &arr[0] - 1; }
-    private:
-        elem arr[N];
-    };
-
     template<int N>
     class Matrix
     {
@@ -69,29 +16,50 @@ namespace Module1 {
         using cref = const float&;
 
         Matrix() {
-            std::memset(&this->arr[0][0], 0, N*N*sizeof(float));
+            std::memset(&this->arr[0][0], 0, N*N*sizeof(elem));
         };
 
+        Matrix(std::initializer_list<std::initializer_list<elem>> elems) {
+            for (int i = 0; i < N; ++i) {
+                auto list = elems.begin() + i;
+                for (int j = 0; j < N; ++j) {
+                    this->arr[i][j] = *(list->begin() + j);
+                }
+            }
+        }
+
         explicit Matrix(float arr[N][N]) {
-            std::memcpy(&this->arr[0][0], &arr[0][0], N*N*sizeof(float));
+            std::memcpy(&this->arr[0][0], &arr[0][0], N*N*sizeof(elem));
         }
 
         Matrix(const Matrix& m) {
-            std::memcpy(&this->arr[0][0], &arr[0][0], N*N*sizeof(float));
+            std::memcpy(&this->arr[0][0], &arr[0][0], N*N*sizeof(elem));
         }
 
         Matrix(Matrix&& m) {
-            std::memcpy(&this->arr[0][0], &arr[0][0], N*N*sizeof(float));
+            std::memcpy(&this->arr[0][0], &arr[0][0], N*N*sizeof(elem));
         }
 
         static int dim() noexcept { return N; }
 
-        iter operator[](size_t i) noexcept {
+        inline float deter() const {
+            return determinantOfMatrix(this->arr, N);
+        }
+
+        Matrix get_t() const {
+            Matrix t;
+            for (int i = 0; i < N; ++i)
+                for (int j = 0; j < N; ++j)
+                    t[j][i] = this->arr[i][j];
+            return t;
+        }
+
+        iter operator[](int i) noexcept {
             assert(i < N);
             return arr[i];
         }
 
-        citer operator[](size_t i) const noexcept {
+        citer operator[](int i) const noexcept {
             assert(i < N);
             return arr[i];
         }
@@ -110,6 +78,59 @@ namespace Module1 {
 
     private:
         elem arr[N][N];
+
+        static void getCofactor(const elem mat[N][N], elem temp[N][N], int p, int q, int n)
+        {
+            int i = 0, j = 0;
+
+            // Looping for each element of the matrix
+            for (int row = 0; row < n; row++)
+            {
+                for (int col = 0; col < n; col++)
+                {
+                    //  Copying into temporary matrix only those element
+                    //  which are not in given row and column
+                    if (row != p && col != q)
+                    {
+                        temp[i][j++] = mat[row][col];
+
+                        // Row is filled, so increase row index and
+                        // reset col index
+                        if (j == n - 1)
+                        {
+                            j = 0;
+                            i++;
+                        }
+                    }
+                }
+            }
+        }
+
+        static elem determinantOfMatrix(const elem mat[N][N], int n)
+        {
+            int D = 0; // Initialize result
+
+            //  Base case : if matrix contains single element
+            if (n == 1)
+                return mat[0][0];
+
+            elem temp[N][N]; // To store cofactors
+
+            int sign = 1;  // To store sign multiplier
+
+             // Iterate for each element of first row
+            for (int f = 0; f < n; f++)
+            {
+                // Getting Cofactor of mat[0][f]
+                getCofactor(mat, temp, 0, f, n);
+                D += sign * mat[0][f] * determinantOfMatrix(temp, n - 1);
+
+                // terms are to be added with alternate sign
+                sign = -sign;
+            }
+
+            return D;
+        }
     };
 
     // ADDITION AND SUBSTRACTION
@@ -132,22 +153,6 @@ namespace Module1 {
         return result;
     }
 
-    template <int N>
-    Vector<N> operator+(const Vector<N>& v1, const Vector<N>& v2) {
-        Vector<N> result;
-        for (int i = 0; i < N; ++i)
-            result[i] = v1[i] + v2[i];
-        return result;
-    }
-
-    template <int N>
-    Vector<N> operator-(const Vector<N>& v1, const Vector<N>& v2) {
-        Vector<N> result;
-        for (int i = 0; i < N; ++i)
-            result[i] = v1[i] - v2[i];
-        return result;
-    }
-
     // MULTIPLICATION
 
     template <int N>
@@ -159,7 +164,7 @@ namespace Module1 {
     }
 
     template <int N>
-    Matrix<N> operator*(float k, const Matrix<N>& m) {
+    inline Matrix<N> operator*(float k, const Matrix<N>& m) {
         return m * k;
     }
 
@@ -170,24 +175,6 @@ namespace Module1 {
             for (int j = 0; j < N; ++j)
                 for (int r = 0; r < N; ++r)
                     result[i][j] += m1[i][r] * m2[r][j];
-        return result;
-    }
-
-    template <int N>
-    Vector<N> operator*(const Vector<N>& v, const Matrix<N>& m) {
-        Vector<N> result;
-        for (int i = 0; i < N; ++i)
-            for (int j = 0; j < N; ++j)
-                result[i] += v[j] * m[j][i];
-        return result;
-    }
-
-    template <int N>
-    Vector<N> operator*(const Matrix<N>& m, const Vector<N>& v) {
-        Vector<N> result;
-        for (int i = 0; i < N; ++i)
-            for (int j = 0; j < N; ++j)
-                result[i] += v[i] * m[j][i];
         return result;
     }
 
@@ -217,21 +204,4 @@ namespace Module1 {
            return os << ']';
     }
 
-    template <int N>
-    std::ostream& operator<<(std::ostream& os, const Vector<N>& v) {
-        os << '(';
-        for (int i = 0; i < N; ++i)
-            os << v[i] << ", ";
-        os << "\b\b)";
-        return os;
-    }
-
-    template <int N>
-    std::ostream& operator<<(std::ostream& os, Vector<N>&& v) {
-        os << '(';
-        for (int i = 0; i < N; ++i)
-            os << v[i] << ", ";
-        os << "\b\b)";
-        return os;
-    }
 }
