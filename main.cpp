@@ -16,5 +16,7 @@ int main()
     cout << m * p << endl;
     cout << p * m << endl;
 
+    cout << m.inverse() << endl;
+
     return 0;
 }
