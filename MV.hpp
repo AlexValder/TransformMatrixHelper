@@ -45,7 +45,7 @@ namespace Module1 {
         Point<N> result;
         for (int i = 0; i < N; ++i)
             for (int j = 0; j < N; ++j)
-                result[i] += v[i] * m[j][i];
+                result[i] += v[j] * m[i][j];
         return result;
     }
 }

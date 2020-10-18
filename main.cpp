@@ -14,6 +14,7 @@ int main()
     cout << m << endl;
     cout << p << endl;
     cout << m * p << endl;
+    cout << p * m << endl;
 
     return 0;
 }
