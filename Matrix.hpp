@@ -176,6 +176,7 @@ namespace Module1 {
         for (size_t i = 0; i < N; ++i)
             for (size_t j = 0; j < N; ++j)
                 result[i][j] = m[i][j] * k;
+        return result;
     }
 
     template <int N>

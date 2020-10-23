@@ -11,12 +11,8 @@ int main()
 
     Matrix<2> m = {{-1,-3},{1,2}};
 
-    cout << m << endl;
-    cout << p << endl;
-    cout << m * p << endl;
-    cout << p * m << endl;
-
-    cout << m.inverse() << endl;
+    auto m1 = E3 * 2;
+    cout << m1 << endl;
 
     return 0;
 }
