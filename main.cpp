@@ -7,12 +7,11 @@ using namespace Module1;
 
 int main()
 {
-    Point<2> p = {-3, 2};
+    Point<2> before[3] = { {-4, 2}, {-3,-1}, {-1,1} };
+    Point<2> after[3] = { {2,3}, {4,-1}, {-1,5} };
 
-    Matrix<2> m = {{-1,-3},{1,2}};
-
-    auto m1 = E3 * 2;
-    cout << m1 << endl;
+    auto t = FindTransformMatrix(before, after);
+    cout << t << endl;
 
     return 0;
 }

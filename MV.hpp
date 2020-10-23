@@ -48,4 +48,20 @@ namespace Module1 {
                 result[i] += v[j] * m[i][j];
         return result;
     }
+
+    Matrix<3> FindTransformMatrix(Point<2> before[3], Point<2> after[3])
+    {
+        auto ret = Matrix<3>
+        {
+            {before[0][0], before[0][1], 1},
+            {before[1][0], before[1][1], 1},
+            {before[2][0], before[2][0], 1}
+        }.inverse() * Matrix<3>
+        {
+            {after[0][0], after[0][1], 1},
+            {after[1][0], after[1][1], 1},
+            {after[2][0], after[2][0], 1}
+        };
+        return ret;
+    }
 }
